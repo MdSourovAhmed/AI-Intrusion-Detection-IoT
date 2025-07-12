@@ -2,10 +2,6 @@
 
 This project integrates **real-time IoT sensor data** with an **AI-based intrusion detection system (IDS)** running on a **Raspberry Pi**. It uses **MQTT**, **Node-RED**, **Prometheus**, and **Grafana** to monitor and detect cyberattacks such as DDoS and packet injection.  
 
-![System Architecture](screenshots/system_architecture.png)
-
----
-
 ## ⚙️ Features
 
 - Collect sensor data using ESP8266 over MQTT
@@ -20,6 +16,9 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 ## 📐 System Architecture
 
 ```
+![System Architecture](screenshots/system_architecture.png)
+
+---
 [ESP8266 Sensors] → MQTT → Mosquitto Broker (Raspberry Pi)
                                   ↓
                       [Node-RED] → Prometheus Exporter → Grafana Dashboard
@@ -28,6 +27,14 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 ```
 
 ---
+
+## 📐 DHT11 + PIR + ESP8266
+
+```
+![System Architecture](screenshots/ESP8266_SetUp.png)
+
+---
+
 
 ## 📦 Installation
 
