@@ -18,7 +18,17 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ## 📐 System Architecture
 
-![System Architecture](screenshots/system_architecture.png)
+<table>
+  <tr>
+    <th>System Architecture</th>
+    <th>Data Collection System Flowchart</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/system_architecture.png" width="400"/></td>
+    <td><img src="screenshots/Data_Collection_System_Flowchart.png" width="400"/></td>
+  </tr>
+</table>
+
 
 ```text
 [ESP8266 Sensors] → MQTT → Mosquitto Broker (Raspberry Pi)
@@ -32,17 +42,17 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ## 🧪 Sensor Setup: DHT11 + PIR + ESP8266
 
-![ESP8266 Setup](screenshots/ESP8266_SetUp.png)
+<img src="screenshots/ESP8266_SetUp.png" alt="System Architecture" width="500" height="300"/>
 
 ---
 
-
 ---
 
-## 🧪 Sensor Setup: DHT11 + PIR + ESP8266
+### 📍 On ESP8266:
 
-![ESP8266 Setup](screenshots/ESP8266_SetUp.png)
-
+- Upload `sensor_publisher.ino` using Arduino IDE
+- Configure your Wi-Fi and MQTT broker address
+  
 ---
 
 ## 📦 Installation
