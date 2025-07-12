@@ -1,24 +1,26 @@
+
 # 🛡️ AI-Based Real-Time Intrusion Detection System on Raspberry Pi
 
-This project integrates **real-time IoT sensor data** with an **AI-based intrusion detection system (IDS)** running on a **Raspberry Pi**. It uses **MQTT**, **Node-RED**, **Prometheus**, and **Grafana** to monitor and detect cyberattacks such as DDoS and packet injection.  
+This project integrates **real-time IoT sensor data** with an **AI-based intrusion detection system (IDS)** running on a **Raspberry Pi**. It uses **MQTT**, **Node-RED**, **Prometheus**, and **Grafana** to monitor and detect cyberattacks such as DDoS and packet injection.
+
+---
 
 ## ⚙️ Features
 
-- Collect sensor data using ESP8266 over MQTT
-- Analyze network traffic on Raspberry Pi using Scapy
-- Detect DDoS and packet injection attacks via AI (Random Forest model)
-- Visualize live metrics in Grafana
-- Trigger alert emails and Grafana notifications
-- Support for `iptables` flood protection and Cloudflared tunnel
+- Collect sensor data using ESP8266 over MQTT  
+- Analyze network traffic on Raspberry Pi using Scapy  
+- Detect DDoS and packet injection attacks via AI (Random Forest model)  
+- Visualize live metrics in Grafana  
+- Trigger alert emails and Grafana notifications  
+- Support for `iptables` flood protection and Cloudflared tunnel  
 
 ---
 
 ## 📐 System Architecture
 
-```
 ![System Architecture](screenshots/system_architecture.png)
 
----
+```text
 [ESP8266 Sensors] → MQTT → Mosquitto Broker (Raspberry Pi)
                                   ↓
                       [Node-RED] → Prometheus Exporter → Grafana Dashboard
@@ -28,17 +30,24 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ---
 
-## 📐 DHT11 + PIR + ESP8266
+## 🧪 Sensor Setup: DHT11 + PIR + ESP8266
 
-```
-![System Architecture](screenshots/ESP8266_SetUp.png)
+![ESP8266 Setup](screenshots/ESP8266_SetUp.png)
 
 ---
 
 
+---
+
+## 🧪 Sensor Setup: DHT11 + PIR + ESP8266
+
+![ESP8266 Setup](screenshots/ESP8266_SetUp.png)
+
+---
+
 ## 📦 Installation
 
-### Raspberry Pi Setup
+### 🔧 Raspberry Pi Setup
 
 ```bash
 sudo apt update && sudo apt upgrade
@@ -57,15 +66,13 @@ bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/mast
 sudo systemctl enable nodered.service
 ```
 
-### Add MQTT Node
+### Configure MQTT Node
 
-- Open Node-RED (`http://<RPI_IP>:1880`)
-- Install the **`node-red-contrib-mqtt-broker`** package
-- Drag MQTT input node, connect to Prometheus node or function
-- MQTT Topic: `sensor/data`
-- Parse incoming JSON and expose as Prometheus metric
+- Access Node-RED at: `http://<RPI_IP>:1880`
+- Install `node-red-contrib-mqtt-broker`
+- Drag MQTT input node, parse the JSON, and connect it to Prometheus
 
-**Example Node-RED Flow JSON (import this):**
+#### Example Flow (Import This):
 
 ```json
 [
@@ -123,7 +130,7 @@ cd prometheus-*/
 ./prometheus --config.file=prometheus.yml
 ```
 
-### Prometheus `prometheus.yml` Configuration
+### `prometheus.yml` Configuration
 
 ```yaml
 global:
@@ -139,7 +146,7 @@ scrape_configs:
       - targets: ['localhost:8000']
 ```
 
-> Place this config in `prometheus.yml`, then restart Prometheus.
+> Save as `prometheus.yml` and restart Prometheus.
 
 ---
 
@@ -151,8 +158,8 @@ sudo systemctl enable --now grafana-server
 ```
 
 - Access Grafana: `http://<RPI_IP>:3000`
-- Add Prometheus as data source
-- Import dashboard using the JSON provided in `dashboards/grafana_dashboard.json`
+- Add **Prometheus** as a data source
+- Import dashboard JSON from: `dashboards/grafana_dashboard.json`
 
 ---
 
@@ -172,16 +179,16 @@ cloudflared tunnel create ids-tunnel
 
 ### Selected Features
 
-```
+```text
 ['proto', 'src_pkts', 'dst_port', 'dst_pkts', 'src_port', 'packet_frequency', 'dst_bytes', 'src_bytes']
 ```
 
 ### Model Training
 
-- Dataset: TON_IoT + Live tcpdump merged
-- Model: Random Forest
-- Accuracy: ~99.9%
-- Exported: `ai_ids_model.pkl` + `scaler.pkl`
+- Dataset: TON_IoT + live `tcpdump` merged
+- Model: Random Forest  
+- Accuracy: ~99.9%  
+- Exported files: `ai_ids_model.pkl`, `scaler.pkl`
 
 ---
 
@@ -191,25 +198,24 @@ cloudflared tunnel create ids-tunnel
 python3 scripts/intrusion_detection.py
 ```
 
-- Captures live packets with `Scapy`
-- Predicts using `ai_ids_model.pkl`
-- On detection:
-  - Email sent via `smtplib`
-  - CSV logged
-  - Prometheus alert updated (`intrusion_alert`)
+- Captures packets using Scapy  
+- Uses `ai_ids_model.pkl` for real-time prediction  
+- On attack detection:
+  - Sends email via `smtplib`
+  - Logs entry to CSV
+  - Exposes Prometheus metric (`intrusion_alert`)
 
 ---
 
-## 🧪 Attack Simulation
+## 🧪 Attack Simulation (Kali Linux)
 
-### From Kali Linux
+### Simulate DDoS (TCP SYN Flood)
 
 ```bash
-# DDoS (TCP Flood)
 hping3 -S <RPI_IP> -p 1883 --flood
 ```
 
-### Packet Injection / MQTT Flooding
+### MQTT Injection
 
 ```bash
 mosquitto_pub -t sensor/data -m '{"temp":999,"motion":5}'
@@ -217,7 +223,7 @@ mosquitto_pub -t sensor/data -m '{"temp":999,"motion":5}'
 
 ---
 
-## 🧱 iptables Configuration
+## 🧱 iptables Protection
 
 ```bash
 sudo iptables -A INPUT -p tcp --syn -m limit --limit 15/second --limit-burst 20 -j ACCEPT
@@ -226,7 +232,7 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 
 ---
 
-## 🖼️ Screenshots (add yours)
+## 🖼️ Screenshots
 
 | System Architecture | Grafana Dashboard |
 |---------------------|-------------------|
@@ -236,7 +242,7 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 
 ## 📂 Folder Structure
 
-```
+```text
 .
 ├── README.md
 ├── scripts/
@@ -258,22 +264,21 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 
 ## ✅ TODO / Future Enhancements
 
-- Integrate with fail2ban for IP banning
-- Add advanced models (LSTM, CNN)
-- Host dashboard publicly via secure tunneling
+- Integrate with **fail2ban** for IP banning  
+- Explore deep learning models (LSTM, CNN)  
+- Enable secure public dashboard hosting via tunneling  
 
 ---
 
 ## 🙋 Author
 
 **Md. Sourov Ahmed**  
-Dept. of ICT, [Your University Name]  
-GitHub: [@MdSourovAhmed](https://github.com/MdSourovAhmed)  
-LinkedIn: [LinkedIn Profile](https://www.linkedin.com/in/md-sourov-ahmed-661388334)
+Department of ICT, [Your University Name]  
+- GitHub: [@MdSourovAhmed](https://github.com/MdSourovAhmed)  
+- LinkedIn: [LinkedIn Profile](https://www.linkedin.com/in/md-sourov-ahmed-661388334)
 
 ---
 
 ## 📄 License
 
-MIT License — feel free to use with credit
-
+MIT License — Free to use with attribution.
