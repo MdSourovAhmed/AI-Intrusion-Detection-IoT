@@ -1,156 +1,272 @@
-# 🛡️ AI-Based Intrusion Detection System for IoT Network
+# 🛡️ AI-Based Real-Time Intrusion Detection System on Raspberry Pi
 
-An AI-driven real-time intrusion detection system using **Raspberry Pi**, **ESP8266**, **MQTT**, **TON_IoT Dataset**, and **machine learning**, enhanced with **Node-RED**, **Prometheus**, and **Grafana** for visualization and alerts.
+This project integrates **real-time IoT sensor data** with an **AI-based intrusion detection system (IDS)** running on a **Raspberry Pi**. It uses **MQTT**, **Node-RED**, **Prometheus**, and **Grafana** to monitor and detect cyberattacks such as DDoS and packet injection.  
 
----
-
-## 📸 Screenshots
-
-> *(Add your own screenshots here)*
----
-
-## 🚀 Project Overview
-
-This system monitors IoT sensor data and network traffic on a Raspberry Pi, detects malicious behavior using a machine learning model trained on the TON_IoT dataset, and alerts users via **email** and **Grafana** dashboards in real-time.
+![System Architecture](screenshots/system_architecture.png)
 
 ---
 
-## 🧹 System Architecture
+## ⚙️ Features
+
+- Collect sensor data using ESP8266 over MQTT
+- Analyze network traffic on Raspberry Pi using Scapy
+- Detect DDoS and packet injection attacks via AI (Random Forest model)
+- Visualize live metrics in Grafana
+- Trigger alert emails and Grafana notifications
+- Support for `iptables` flood protection and Cloudflared tunnel
+
+---
+
+## 📐 System Architecture
 
 ```
-ESP8266 + Sensors --> MQTT Broker (Mosquitto) --> Raspberry Pi (AI Detection)
-         |                                 |
-         --> Node-RED --> Prometheus <--> Grafana (Alerts)
-```
-
----
-
-## 🔧 Technologies Used
-
-- **ESP8266** with Motion, Temperature, and Humidity sensors
-- **Raspberry Pi** (Server + Sniffer + AI detection)
-- **MQTT (Mosquitto)** for sensor communication
-- **Node-RED** for message routing
-- **Prometheus + Grafana** for real-time alerting
-- **Scapy / Tcpdump / Tshark** for packet capture
-- **Python (Scikit-learn, Pandas, Joblib)** for model training
-- **TON_IoT Dataset** for supervised training
-
----
-
-## 🧠 AI Model Details
-
-- Dataset: Cleaned and merged `TON_IoT` + live captured MQTT packet data
-- Selected Features:
-  ```
-  ['proto', 'src_pkts', 'dst_port', 'dst_pkts', 
-   'src_port', 'packet_frequency', 'dst_bytes', 'src_bytes']
-  ```
-- Model: `RandomForestClassifier`
-- Accuracy: `~100%` on test data
-- Tools: Google Colab, matplotlib, seaborn
-
----
-
-## 📦 Project Structure
-
-```
-🔹 ESP8266/
-│   └── sensor_publisher.ino            # Code for ESP8266 sensors
-🔹 pi-server/
-│   ├── mqtt_sniffer.py                 # Captures packets from MQTT
-│   ├── intrusion_detector.py           # Uses trained model to detect intrusion
-│   ├── alert_emailer.py                # Sends email on detection
-│   └── intrusion_log.csv               # CSV log of detections
-🔹 model/
-│   ├── ai_ids_model.pkl                # Trained model file
-│   ├── scaler.pkl                      # Scaler used during training
-│   └── training_notebook.ipynb         # Google Colab training notebook
-🔹 dashboard/
-│   ├── node_red_flow.json              # Node-RED flow
-│   └── grafana_dashboard.json          # Prebuilt Grafana JSON
-🔹 data/
-│   ├── cleaned_ton_iot.csv             # Cleaned TON_IoT data
-│   └── merged_dataset.csv              # Final dataset used to train
-🔹 images/
-│   ├── architecture.png                # System architecture diagram
-│   └── grafana-alerts.png              # Grafana panel screenshot
-🔹 README.md
-🔹 requirements.txt
+[ESP8266 Sensors] → MQTT → Mosquitto Broker (Raspberry Pi)
+                                  ↓
+                      [Node-RED] → Prometheus Exporter → Grafana Dashboard
+                                  ↓
+                   Live Packet Sniffer (Scapy) → AI Intrusion Detector → Alert (Email + Grafana)
 ```
 
 ---
 
-## ⚙️ How to Run
+## 📦 Installation
 
-### 📍 On Raspberry Pi:
+### Raspberry Pi Setup
 
-1. Install required packages:
-   ```bash
-   pip install scapy joblib pandas numpy prometheus_client
-   ```
-2. Start Prometheus metrics server + detection:
-   ```bash
-   python intrusion_detector.py
-   ```
-
-### 📍 On ESP8266:
-
-- Upload `sensor_publisher.ino` using Arduino IDE
-- Configure your Wi-Fi and MQTT broker address
-
-### 📍 Node-RED + Grafana:
-
-- Import provided Node-RED flow
-- Set up Prometheus + Grafana dashboards using the JSON files
+```bash
+sudo apt update && sudo apt upgrade
+sudo apt install python3-pip mosquitto mosquitto-clients
+pip3 install scapy pandas joblib prometheus_client
+```
 
 ---
 
-## 🔥 Simulating Attacks
+## 🧰 Node-RED Setup
 
-To simulate attacks for testing:
+### Install Node-RED
 
-- Use `hping3`, `nping`, or MQTT fuzzers from a Kali Linux VM
-- Example:
-  ```bash
-  hping3 -S -p 1883 --flood <raspberry_pi_ip>
-  ```
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+sudo systemctl enable nodered.service
+```
+
+### Add MQTT Node
+
+- Open Node-RED (`http://<RPI_IP>:1880`)
+- Install the **`node-red-contrib-mqtt-broker`** package
+- Drag MQTT input node, connect to Prometheus node or function
+- MQTT Topic: `sensor/data`
+- Parse incoming JSON and expose as Prometheus metric
+
+**Example Node-RED Flow JSON (import this):**
+
+```json
+[
+  {
+    "id": "mqtt_sensor",
+    "type": "mqtt in",
+    "z": "flow_id",
+    "name": "",
+    "topic": "sensor/data",
+    "qos": "2",
+    "datatype": "json",
+    "broker": "mqtt_broker_id",
+    "x": 100,
+    "y": 100,
+    "wires": [["function_to_metric"]]
+  },
+  {
+    "id": "function_to_metric",
+    "type": "function",
+    "z": "flow_id",
+    "name": "Format as metric",
+    "func": "msg.payload = {
+  temperature: msg.payload.temp,
+  motion: msg.payload.motion
+};
+return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 300,
+    "y": 100,
+    "wires": [["prometheus_node"]]
+  },
+  {
+    "id": "prometheus_node",
+    "type": "prometheus-exporter",
+    "z": "flow_id",
+    "name": "Prometheus Metrics",
+    "x": 500,
+    "y": 100,
+    "wires": []
+  }
+]
+```
 
 ---
 
-## 📈 Model Training Notebook
+## 📊 Prometheus Setup
 
-Model training was done in Google Colab using:
+### Install
 
-- TON_IoT network dataset
-- Feature selection, encoding, and scaling
-- Random Forest Classifier
-- Evaluation using Confusion Matrix & ROC Curve
+```bash
+wget https://github.com/prometheus/prometheus/releases/latest/download/prometheus-*.linux-armv7.tar.gz
+tar xvf prometheus-*.tar.gz
+cd prometheus-*/
+./prometheus --config.file=prometheus.yml
+```
 
-See: [`training_notebook.ipynb`](model/training_notebook.ipynb)
+### Prometheus `prometheus.yml` Configuration
+
+```yaml
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'node-red-sensors'
+    static_configs:
+      - targets: ['localhost:1880']
+
+  - job_name: 'ai_intrusion_detector'
+    static_configs:
+      - targets: ['localhost:8000']
+```
+
+> Place this config in `prometheus.yml`, then restart Prometheus.
 
 ---
 
-## 📬 Alerts and Logging
+## 📈 Grafana Setup
 
-- 📧 Email notification upon attack detection
-- 📊 Grafana alert triggered via Prometheus metric (`intrusion_alert`)
-- 🗒️ CSV log: `intrusion_log.csv`
+```bash
+sudo apt install grafana
+sudo systemctl enable --now grafana-server
+```
+
+- Access Grafana: `http://<RPI_IP>:3000`
+- Add Prometheus as data source
+- Import dashboard using the JSON provided in `dashboards/grafana_dashboard.json`
 
 ---
 
-## 🤝 Contributing
+## 🌐 Cloudflared Tunnel (Optional)
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+```bash
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm
+chmod +x cloudflared-linux-arm
+sudo mv cloudflared-linux-arm /usr/local/bin/cloudflared
+cloudflared tunnel login
+cloudflared tunnel create ids-tunnel
+```
+
+---
+
+## 🧠 AI Model: Intrusion Detection
+
+### Selected Features
+
+```
+['proto', 'src_pkts', 'dst_port', 'dst_pkts', 'src_port', 'packet_frequency', 'dst_bytes', 'src_bytes']
+```
+
+### Model Training
+
+- Dataset: TON_IoT + Live tcpdump merged
+- Model: Random Forest
+- Accuracy: ~99.9%
+- Exported: `ai_ids_model.pkl` + `scaler.pkl`
+
+---
+
+## 🔍 Live Detection + Email Alert
+
+```bash
+python3 scripts/intrusion_detection.py
+```
+
+- Captures live packets with `Scapy`
+- Predicts using `ai_ids_model.pkl`
+- On detection:
+  - Email sent via `smtplib`
+  - CSV logged
+  - Prometheus alert updated (`intrusion_alert`)
+
+---
+
+## 🧪 Attack Simulation
+
+### From Kali Linux
+
+```bash
+# DDoS (TCP Flood)
+hping3 -S <RPI_IP> -p 1883 --flood
+```
+
+### Packet Injection / MQTT Flooding
+
+```bash
+mosquitto_pub -t sensor/data -m '{"temp":999,"motion":5}'
+```
+
+---
+
+## 🧱 iptables Configuration
+
+```bash
+sudo iptables -A INPUT -p tcp --syn -m limit --limit 15/second --limit-burst 20 -j ACCEPT
+sudo iptables -A INPUT -p tcp --syn -j DROP
+```
+
+---
+
+## 🖼️ Screenshots (add yours)
+
+| System Architecture | Grafana Dashboard |
+|---------------------|-------------------|
+| ![](screenshots/system_architecture.png) | ![](screenshots/grafana_view.png) |
+
+---
+
+## 📂 Folder Structure
+
+```
+.
+├── README.md
+├── scripts/
+│   ├── intrusion_detection.py
+│   └── mqtt_simulator.py
+├── models/
+│   ├── ai_ids_model.pkl
+│   └── scaler.pkl
+├── dashboards/
+│   └── grafana_dashboard.json
+├── dataset/
+│   └── cleaned_ton_iot.csv
+├── screenshots/
+│   ├── system_architecture.png
+│   └── grafana_view.png
+```
+
+---
+
+## ✅ TODO / Future Enhancements
+
+- Integrate with fail2ban for IP banning
+- Add advanced models (LSTM, CNN)
+- Host dashboard publicly via secure tunneling
+
+---
+
+## 🙋 Author
+
+**Md. Sourov Ahmed**  
+Dept. of ICT, [Your University Name]  
+GitHub: [@MdSourovAhmed](https://github.com/MdSourovAhmed)  
+LinkedIn: [LinkedIn Profile](https://www.linkedin.com/in/md-sourov-ahmed-661388334)
 
 ---
 
 ## 📄 License
 
-MIT License © 2025 Md. Sourov Ahmed
+MIT License — feel free to use with credit
 
----
-
-## 🤛 Author
-
-**Md. Sourov Ahmed**Department of ICT, [Your University Name]Contact: [mdsourovahmedsamin@gmail.com](mailto:mdsourovahmedsamin@gmail.com)GitHub: [MdSourovAhmed](https://github.com/MdSourovAhmed)
