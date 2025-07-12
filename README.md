@@ -46,7 +46,6 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ---
 
----
 
 ### 📍 On ESP8266:
 
@@ -54,6 +53,7 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 - Configure your Wi-Fi and MQTT broker address
   
 ---
+
 
 ## 📦 Installation
 
@@ -241,12 +241,19 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 ```
 
 ---
+## 🖼️ Sensor Data & Raspbarry Pi Health Visualization
 
-## 🖼️ Screenshots
+| Grafana Dashboard |
+|-------------------|
+| ![](screenshots/grafana_view.png) |
 
-| System Architecture | Grafana Dashboard |
-|---------------------|-------------------|
-| ![](screenshots/system_architecture.png) | ![](screenshots/grafana_view.png) |
+---
+
+## 🖼️ Attack, Logs & Alert Visualization
+
+| Normal & Attack Situations |
+|-------------------|
+| ![](screenshots/Attack_view.png) |
 
 ---
 
@@ -268,6 +275,8 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 ├── screenshots/
 │   ├── system_architecture.png
 │   └── grafana_view.png
+|   └── ---------
+|   └── ---------
 ```
 
 ---
@@ -283,7 +292,7 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 ## 🙋 Author
 
 **Md. Sourov Ahmed**  
-Department of ICT, [Your University Name]  
+Department of ICT, [Mawlana Bhashani Science and Technology University]  
 - GitHub: [@MdSourovAhmed](https://github.com/MdSourovAhmed)  
 - LinkedIn: [LinkedIn Profile](https://www.linkedin.com/in/md-sourov-ahmed-661388334)
 
