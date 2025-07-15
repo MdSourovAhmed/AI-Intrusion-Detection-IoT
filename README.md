@@ -45,7 +45,7 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 <!-- <img src="screenshots/ESP8266_SetUp.png" alt="System Architecture" width="500" height="300"/> -->
 | Senson Integration Circuit Diagram with ESP8266 | Senson Integration with ESP8266 |
 |-------------------------------------------------|----------------------------------------------|
-| ![](screenshots/Esp8266_SetUp_Circuit_Diagram.png) | ![](screenshots/Esp8266_SetUp.png) |
+| ![](screenshots/Esp8266_SetUp_Circuit_Diagram.png) | ![](screenshots/ESP8266_SetUp.png) |
 
 ---
 
