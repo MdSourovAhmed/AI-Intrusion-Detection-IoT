@@ -42,7 +42,10 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ## 🧪 Sensor Setup: DHT11 + PIR + ESP8266
 
-<img src="screenshots/ESP8266_SetUp.png" alt="System Architecture" width="500" height="300"/>
+<!-- <img src="screenshots/ESP8266_SetUp.png" alt="System Architecture" width="500" height="300"/> -->
+| Senson Integration Circuit Diagram with ESP8266 | Senson Integration with ESP8266 |
+|-------------------------------------------------|----------------------------------------------|
+| ![](screenshots/Esp8266_SetUp_Circuit_Diagram.png) | ![](screenshots/Esp8266_SetUp.png) |
 
 ---
 
@@ -241,19 +244,45 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 ```
 
 ---
+
 ## 🖼️ Sensor Data & Raspbarry Pi Health Visualization
 
-| Grafana Dashboard |
+<!-- | Grafana Dashboard |
 |-------------------|
-| ![](screenshots/grafana_view.png) |
+| ![](screenshots/grafana_view.png) | -->
+<table>
+  <tr>
+    <th>Reading sensor data from Arduino</th>
+    <th>Grafana Dashboard</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/Arduino.jpeg" width="400"/></td>
+    <td><img src="screenshots/Grafana_dashboard.jpeg" width="400"/></td>
+  </tr>
+</table>
 
 ---
 
-## 🖼️ Attack, Logs & Alert Visualization
+## 🖼️ Attack and Logs Visualization
 
 | Normal & Attack Situations |
 |-------------------|
-| ![](screenshots/Attack_view.png) |
+| ![](screenshots/Attack.jpeg) |
+
+---
+
+## 🖼️ Alert in Grafana Dashboard & Alert by E-mail Visualization
+
+<table>
+  <tr>
+    <th>Grafana Alert Dashboard</th>
+    <th>Alert by E-mail</th>
+  </tr>
+  <tr>
+    <td><img src="screenshots/Grafana_Alert_dashboard.jpeg" width="400"/></td>
+    <td><img src="screenshots/Email_alert.jpeg" width="400"/></td>
+  </tr>
+</table>
 
 ---
 
