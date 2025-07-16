@@ -62,6 +62,8 @@ This project integrates **real-time IoT sensor data** with an **AI-based intrusi
 
 ### 🔧 Raspberry Pi Setup
 
+## 🧰 MQTT Setup (See Mosquitto_setup folder for everything)
+
 ```bash
 sudo apt update && sudo apt upgrade
 sudo apt install python3-pip mosquitto mosquitto-clients
@@ -70,7 +72,7 @@ pip3 install scapy pandas joblib prometheus_client
 
 ---
 
-## 🧰 Node-RED Setup
+## 🧰 Node-RED Setup (See Nodered_setup folder for everything)
 
 ### Install Node-RED
 
@@ -85,54 +87,11 @@ sudo systemctl enable nodered.service
 - Install `node-red-contrib-mqtt-broker`
 - Drag MQTT input node, parse the JSON, and connect it to Prometheus
 
-#### Example Flow (Import This):
-
-```json
-[
-  {
-    "id": "mqtt_sensor",
-    "type": "mqtt in",
-    "z": "flow_id",
-    "name": "",
-    "topic": "sensor/data",
-    "qos": "2",
-    "datatype": "json",
-    "broker": "mqtt_broker_id",
-    "x": 100,
-    "y": 100,
-    "wires": [["function_to_metric"]]
-  },
-  {
-    "id": "function_to_metric",
-    "type": "function",
-    "z": "flow_id",
-    "name": "Format as metric",
-    "func": "msg.payload = {
-  temperature: msg.payload.temp,
-  motion: msg.payload.motion
-};
-return msg;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 300,
-    "y": 100,
-    "wires": [["prometheus_node"]]
-  },
-  {
-    "id": "prometheus_node",
-    "type": "prometheus-exporter",
-    "z": "flow_id",
-    "name": "Prometheus Metrics",
-    "x": 500,
-    "y": 100,
-    "wires": []
-  }
-]
-```
+#### Flows (Import flows from `Nodered_setup/` folder):
 
 ---
 
-## 📊 Prometheus Setup
+## 📊 Prometheus Setup (See Prometheus_setup folder for everything)
 
 ### Install
 
@@ -143,7 +102,7 @@ cd prometheus-*/
 ./prometheus --config.file=prometheus.yml
 ```
 
-### `prometheus.yml` Configuration
+### `prometheus.yml` Configuration 
 
 ```yaml
 global:
@@ -196,12 +155,12 @@ cloudflared tunnel create ids-tunnel
 ['proto', 'src_pkts', 'dst_port', 'dst_pkts', 'src_port', 'packet_frequency', 'dst_bytes', 'src_bytes']
 ```
 
-### Model Training
+### Model Training (Make you own dataset and train your own model in your system for better resulr)
 
 - Dataset: TON_IoT + live `tcpdump` merged
 - Model: Random Forest  
 - Accuracy: ~99.9%  
-- Exported files: `ai_ids_model.pkl`, `scaler.pkl`
+- Exported files: `binary_ids_model.joblib`, `binary_scaler.joblib`
 
 ---
 
@@ -212,7 +171,7 @@ python3 scripts/intrusion_detection.py
 ```
 
 - Captures packets using Scapy  
-- Uses `ai_ids_model.pkl` for real-time prediction  
+- Uses `intrusion_detection.joblib` for real-time prediction  
 - On attack detection:
   - Sends email via `smtplib`
   - Logs entry to CSV
@@ -236,12 +195,12 @@ mosquitto_pub -t sensor/data -m '{"temp":999,"motion":5}'
 
 ---
 
-## 🧱 iptables Protection
+<!-- ## 🧱 iptables Protection
 
 ```bash
 sudo iptables -A INPUT -p tcp --syn -m limit --limit 15/second --limit-burst 20 -j ACCEPT
 sudo iptables -A INPUT -p tcp --syn -j DROP
-```
+``` -->
 
 ---
 
@@ -290,22 +249,40 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
 
 ```text
 .
+│── Main/
+│── ESP8266/
 ├── README.md
+│── Mosquitto_setup/
+│── Nodered_setup/
+├── Prometheus_setup/
+├── Grafana_setup/
 ├── scripts/
 │   ├── intrusion_detection.py
-│   └── mqtt_simulator.py
+│   └── All_services_enable_start.sh
+    └── Iptables_firewall.sh
 ├── models/
-│   ├── ai_ids_model.pkl
-│   └── scaler.pkl
-├── dashboards/
-│   └── grafana_dashboard.json
+│   ├── binary_ids_model.joblib
+│   └── binary_scaler.joblib
 ├── dataset/
-│   └── cleaned_ton_iot.csv
+│   └── Use_your_own_dataset.csv
 ├── screenshots/
 │   ├── system_architecture.png
 │   └── grafana_view.png
-|   └── ---------
-|   └── ---------
+│   └── ---------
+│   └── ---------
+
+```
+
+---
+
+## How to run:
+
+- Make sure you do have all the files 
+- Go to the `Main/` folder and run the following bash script
+
+```bash
+sudo bash main.sh
+
 ```
 
 ---

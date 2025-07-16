@@ -1,0 +1,169 @@
+[
+    {
+        "id": "394d6bae345e927f",
+        "type": "tab",
+        "label": "Flow 5",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "function-node",
+        "type": "function",
+        "z": "394d6bae345e927f",
+        "name": "Parse Intrusion Log",
+        "func": "const logEntry = {};\n\n// Extract timestamp\nconst timestampMatch = msg.payload.match(/\\((\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})\\)/);\nif (timestampMatch) logEntry.timestamp = new Date(timestampMatch[1]);\n\n// Extract numeric metrics\nconst metrics = [\n    { name: 'confidence', pattern: /Confidence: (\\d+\\.\\d+)%/ },\n    { name: 'protocol', pattern: /Protocol: (\\d+)/ },\n    { name: 'tcp_flags', pattern: /TCP Flags: (\\d+)/ },\n    { name: 'length_bytes', pattern: /Length: (\\d+) bytes/ },\n    { name: 'packet_rate', pattern: /Packet Rate: (\\d+\\.\\d+)\\/s/ },\n    { name: 'burst_score', pattern: /Burst Score: (\\d+\\.\\d+)/ }\n];\n\nmetrics.forEach(metric => {\n    const match = msg.payload.match(metric.pattern);\n    if (match) logEntry[metric.name] = parseFloat(match[1]);\n});\n\n// Extract IP information\nconst sourceMatch = msg.payload.match(/Source: (\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)/);\nconst destMatch = msg.payload.match(/Destination: (\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)/);\n\nif (sourceMatch) {\n    logEntry.source_ip = sourceMatch[1];\n    logEntry.source_port = sourceMatch[2];\n}\nif (destMatch) {\n    logEntry.dest_ip = destMatch[1];\n    logEntry.dest_port = destMatch[2];\n}\n\n// Decode TCP flags\nif (logEntry.tcp_flags) {\n    const flags = {\n        fin: (logEntry.tcp_flags & 1) !== 0,\n        syn: (logEntry.tcp_flags & 2) !== 0,\n        rst: (logEntry.tcp_flags & 4) !== 0,\n        psh: (logEntry.tcp_flags & 8) !== 0,\n        ack: (logEntry.tcp_flags & 16) !== 0,\n        urg: (logEntry.tcp_flags & 32) !== 0\n    };\n    \n    logEntry.tcp_flag_details = flags;\n    logEntry.tcp_flags_string = Object.keys(flags)\n        .filter(flag => flags[flag])\n        .join('_');\n}\n\nmsg.payload = logEntry;\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 160,
+        "wires": [
+            [
+                "39dcf7a7083f68b0",
+                "3cda8775780213c7",
+                "4226b2d4af737d5e",
+                "ca89ecc082525c90",
+                "0c821f63e64edf36",
+                "3057fcd650a071fd"
+            ]
+        ]
+    },
+    {
+        "id": "465f592502151734",
+        "type": "tail-file",
+        "z": "394d6bae345e927f",
+        "filename": "/var/log/ids_alerts.log",
+        "createFile": false,
+        "mode": "",
+        "encoding": "utf-8",
+        "split": true,
+        "separator": "",
+        "fromBeginning": false,
+        "flushAtEOF": false,
+        "rememberLast": true,
+        "limitSize": true,
+        "maxBytes": "",
+        "skipBlank": true,
+        "useTrim": true,
+        "sendError": false,
+        "interval": "",
+        "name": "",
+        "x": 300,
+        "y": 340,
+        "wires": [
+            [
+                "function-node"
+            ]
+        ]
+    },
+    {
+        "id": "39dcf7a7083f68b0",
+        "type": "debug",
+        "z": "394d6bae345e927f",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 760,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "3cda8775780213c7",
+        "type": "prometheus-exporter",
+        "z": "394d6bae345e927f",
+        "name": "",
+        "metric": "4da6f2592a992033",
+        "x": 440,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "4226b2d4af737d5e",
+        "type": "prometheus-exporter",
+        "z": "394d6bae345e927f",
+        "name": "",
+        "metric": "9776bdfc3fb79c81",
+        "x": 490,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "ca89ecc082525c90",
+        "type": "prometheus-exporter",
+        "z": "394d6bae345e927f",
+        "name": "",
+        "metric": "505627f4d92964a5",
+        "x": 550,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "0c821f63e64edf36",
+        "type": "prometheus-exporter",
+        "z": "394d6bae345e927f",
+        "name": "",
+        "metric": "f72149e8b85e4b57",
+        "x": 240,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "3057fcd650a071fd",
+        "type": "prometheus-exporter",
+        "z": "394d6bae345e927f",
+        "name": "",
+        "metric": "a0f66cbc25399304",
+        "x": 250,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "4da6f2592a992033",
+        "type": "prometheus-metric-config",
+        "name": "intrusion_confidence",
+        "help": "Intrusion confidence percentage",
+        "labels": "source_ip,dest_ip\t",
+        "mtype": "gauge"
+    },
+    {
+        "id": "9776bdfc3fb79c81",
+        "type": "prometheus-metric-config",
+        "name": "intrusion_packet_rate",
+        "help": "Current packet rate",
+        "labels": "source_ip,protocol\t",
+        "mtype": "gauge"
+    },
+    {
+        "id": "505627f4d92964a5",
+        "type": "prometheus-metric-config",
+        "name": "intrusion_burst_score",
+        "help": "Burst anomaly score",
+        "labels": "source_ip",
+        "mtype": "gauge"
+    },
+    {
+        "id": "f72149e8b85e4b57",
+        "type": "prometheus-metric-config",
+        "name": "intrusion_tcp_flags",
+        "help": "TCP flag combinations",
+        "labels": "tcp_flags",
+        "mtype": "gauge"
+    },
+    {
+        "id": "a0f66cbc25399304",
+        "type": "prometheus-metric-config",
+        "name": "intrusion_events_total",
+        "help": "Total intrusion events",
+        "labels": "protocol",
+        "mtype": "counter"
+    }
+]

@@ -1,0 +1,224 @@
+[
+    {
+        "id": "eeb41b5b9fa78b25",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "mqtt_in",
+        "type": "mqtt in",
+        "z": "eeb41b5b9fa78b25",
+        "name": "Sensor MQTT",
+        "topic": "sensors/esp1/data",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 370,
+        "y": 440,
+        "wires": [
+            [
+                "process_sensor"
+            ]
+        ]
+    },
+    {
+        "id": "process_sensor",
+        "type": "function",
+        "z": "eeb41b5b9fa78b25",
+        "d": true,
+        "name": "Format for Prometheus",
+        "func": "let data = msg.payload;\n\nlet labels = {\n    sensor_id: \"sensor_1\",\n    location: \"lab1\"\n};\n\nmsg.prometheus = [\n  {\n    name: \"sensor_temperature_celsius\",\n    value: Number(data.temperature),\n    type: \"gauge\",\n    labels: labels\n  },\n  {\n    name: \"sensor_humidity_percent\",\n    value: Number(data.humidity),\n    type: \"gauge\",\n    labels: labels\n  },\n  {\n    name: \"sensor_motion_detected\",\n    value: Number(data.motion),\n    type: \"gauge\",\n    labels: labels\n  },\n  {\n    name: \"sensor_last_seen_timestamp\",\n    value: Date.now() / 1000,\n    type: \"gauge\",\n    labels: labels\n  }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 300,
+        "wires": [
+            [
+                "151d38bdfc094d92"
+            ]
+        ]
+    },
+    {
+        "id": "151d38bdfc094d92",
+        "type": "debug",
+        "z": "eeb41b5b9fa78b25",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "6b54dd721be60453",
+        "type": "mqtt in",
+        "z": "eeb41b5b9fa78b25",
+        "name": "ESP1 MQTT Sensor",
+        "topic": "sensors/esp1/data",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 150,
+        "y": 500,
+        "wires": [
+            [
+                "c09113cb5ac51b65"
+            ]
+        ]
+    },
+    {
+        "id": "c09113cb5ac51b65",
+        "type": "function",
+        "z": "eeb41b5b9fa78b25",
+        "name": "Process for Prometheus",
+        "func": "// Extract sensor values from the incoming payload\nconst temp = msg.payload.temperature;\nconst hum = msg.payload.humidity;\nconst motion = msg.payload.motion;\n\n// Return three separate messages with proper structure for each metric\nreturn [\n  { payload: { val: temp }, topic: \"sensor_temperature\", labels: { room: \"living_room\" } },\n  { payload: { val: hum }, topic: \"sensor_humidity\", labels: { room: \"living_room\" } },\n  { payload: { val: motion }, topic: \"sensor_motion\", labels: { room: \"living_room\" } }\n];\n",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 410,
+        "y": 540,
+        "wires": [
+            [
+                "7a6e56a6e4509e6a",
+                "151d38bdfc094d92"
+            ],
+            [
+                "e2a09ef0bd5024ba",
+                "151d38bdfc094d92"
+            ],
+            [
+                "d790e5633a2bb8f1",
+                "151d38bdfc094d92"
+            ]
+        ]
+    },
+    {
+        "id": "7a6e56a6e4509e6a",
+        "type": "prometheus-exporter",
+        "z": "eeb41b5b9fa78b25",
+        "name": "Temperature Gauge",
+        "metric": "cf754bc0f8b52a3d",
+        "x": 680,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "e2a09ef0bd5024ba",
+        "type": "prometheus-exporter",
+        "z": "eeb41b5b9fa78b25",
+        "name": "Humidity Gauge",
+        "metric": "7cc28b645b69a497",
+        "x": 740,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "d790e5633a2bb8f1",
+        "type": "prometheus-exporter",
+        "z": "eeb41b5b9fa78b25",
+        "name": "Motion Gauge",
+        "metric": "33e651d9ea57c285",
+        "x": 680,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "4aa0921bb094a921",
+        "type": "tail-file",
+        "z": "eeb41b5b9fa78b25",
+        "filename": "",
+        "createFile": false,
+        "mode": "",
+        "encoding": "utf-8",
+        "split": true,
+        "separator": "",
+        "fromBeginning": false,
+        "flushAtEOF": false,
+        "rememberLast": true,
+        "limitSize": true,
+        "maxBytes": "",
+        "skipBlank": true,
+        "useTrim": true,
+        "sendError": false,
+        "interval": "",
+        "name": "",
+        "x": 170,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "Local MQTT",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "cf754bc0f8b52a3d",
+        "type": "prometheus-metric-config",
+        "name": "sensor_temperature",
+        "help": "Temperature in Celsius",
+        "labels": "room",
+        "mtype": "gauge"
+    },
+    {
+        "id": "7cc28b645b69a497",
+        "type": "prometheus-metric-config",
+        "name": "sensor_humidity",
+        "help": "Humidity in Percentge",
+        "labels": "room",
+        "mtype": "gauge"
+    },
+    {
+        "id": "33e651d9ea57c285",
+        "type": "prometheus-metric-config",
+        "name": "sensor_motion",
+        "help": "Motion in true or false",
+        "labels": "room",
+        "mtype": "gauge"
+    }
+]
