@@ -238,8 +238,8 @@ sudo iptables -A INPUT -p tcp --syn -j DROP
     <th>Alert by E-mail</th>
   </tr>
   <tr>
-    <td><img src="screenshots/Grafana_Alert_dashboard.jpeg" width="400"/></td>
-    <td><img src="screenshots/Email_alert.jpeg" width="400"/></td>
+    <td><img src="screenshots/Grafana_Alert_dashboard.PNG" width="400"/></td>
+    <td><img src="screenshots/Email_alert.PNG" width="400"/></td>
   </tr>
 </table>
 
